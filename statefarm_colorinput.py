@@ -1,17 +1,18 @@
 #File I/O
 import os
 import glob
-import cv2
 import numpy as np
+import pandas as pd
+
 from datetime import datetime
 import argparse
 import shutil
 from shutil import copyfile
 
-#Etc
-import warnings
-warnings.filterwarnings("ignore")
-import pandas as pd
+#Image processing
+import cv2
+from scipy.ndimage import rotate
+import scipy.misc
 
 #Keras Library
 from tensorflow.keras.models import Model
@@ -22,6 +23,10 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.optimizers import SGD
 from keras_preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+
+#Etc
+import warnings
+warnings.filterwarnings("ignore")
 
 
 #Define parameters
@@ -101,6 +106,42 @@ def generate_split():
     return train_samples, valid_samples
 
 
+def crop_center(img, cropx, cropy):
+    # 이미지 중간을 Crop하는 함수를 정의한다
+    y,x = img.shape
+    startx = x//2-(cropx//2)
+    starty = y//2-(cropy//2)
+    return img[starty:starty+cropy,startx:startx+cropx]
+
+
+def preprocess(image):
+    # rescale
+    image /= 255.
+
+    # rotate
+    rotate_angle = np.random.randint(40) - 20
+    image = rotate(image, rotate_angle)
+
+    # translate
+    rows, cols, _ = image.shape
+    width_translate = np.random.randint(60) - 30
+    height_translate = np.random.randint(60) - 30
+    M = np.float32([[1,0,width_translate],[0,1,height_translate]])
+    image = cv2.warpAffine(image,M,(cols,rows))
+
+    # zoom
+    width_zoom = int(img_row_size * (0.8 + 0.2 * (1 - np.random.random())))
+    height_zoom = int(img_col_size * (0.8 + 0.2 * (1 - np.random.random())))
+    final_image = np.zeros((height_zoom, width_zoom, 3))
+    final_image[:,:,0] = crop_center(image[:,:,0], width_zoom, height_zoom)
+    final_image[:,:,1] = crop_center(image[:,:,1], width_zoom, height_zoom)
+    final_image[:,:,2] = crop_center(image[:,:,2], width_zoom, height_zoom)
+
+    # resize
+    image = cv2.resize(final_image, (img_row_size, img_col_size))
+    return image
+
+
 if __name__ == "__main__":
 
     print('# Train Model')
@@ -127,7 +168,7 @@ if __name__ == "__main__":
     for path in [temp_train_fold, temp_valid_fold, cache, subm]:
         _clear_dir(path)
 
-    datagen = ImageDataGenerator(rescale = 1./255)
+    datagen = ImageDataGenerator(rescale = 1./255, preprocessing_function=preprocess)
 
     #5-fold cross evaluation
     for fold in range(nfolds):
