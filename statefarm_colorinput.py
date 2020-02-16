@@ -123,7 +123,7 @@ if __name__ == "__main__":
     cache = 'cache/{}'.format(suffix)
     subm = 'subm/{}'.format(suffix)
 
-    #Clear & Make suffix folders
+    #이 구문이 있기 때문에 모델 재실행시 기존에 있던 결과들은 다 지워지므로 미리 백업할 것
     for path in [temp_train_fold, temp_valid_fold, cache, subm]:
         _clear_dir(path)
 
@@ -153,7 +153,7 @@ if __name__ == "__main__":
                             epochs=3, validation_data=valid_generator, validation_steps=valid_samples/args.batch_size,
                             shuffle=True, callbacks=callbacks, verbose=1)
 
-        #Predict test data
+        #Predict test data (j=3이면 세번 예측해서 평균)
         for j in range(test_nfolds):
             preds = model.predict_generator(test_generator, steps=len(test_id), verbose=1)
             if j == 0:
@@ -171,8 +171,9 @@ if __name__ == "__main__":
 
         shutil.rmtree(temp_train_fold)
         shutil.rmtree(temp_valid_fold)
+        #temp~ 폴더 안에 있는 자료를 다 지워야 다시 두번째 폴드를 시작할 수 있다.
 
-    #Ensemble results in sub_file 1,2,3 (3 interation precdiction)
+    #Ensemble 5-folds
     print('# Ensemble')
 
     ensemble = 0
