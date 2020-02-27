@@ -13,7 +13,9 @@ https://www.kaggle.com/c/state-farm-distracted-driver-detection
 
 ### 　
 # 2. Let's get it started!
-#File I/O
+###
+### 1) 필요한 모듈을 모두 import 합니다. warnings.filterwarnings("ignore")은 Future Warning을 제거하기 위해 선언해 줍니다.
+```
 import os
 import argparse
 import numpy as np
@@ -23,12 +25,10 @@ from shutil import copyfile, copytree
 from datetime import datetime
 from glob import glob
 
-#Image processing
 import cv2
 from scipy.ndimage import rotate
 import scipy.misc
 
-#Keras Library
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications.vgg16 import VGG16
 from tensorflow.keras.layers import Dense, Dropout, Flatten
@@ -36,10 +36,12 @@ from tensorflow.keras.optimizers import SGD
 from keras_preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
-#Etc
 import warnings
 warnings.filterwarnings("ignore")
 
+```
+### 　
+### 2) 
 
 #Define learning parameters
 parser = argparse.ArgumentParser()
