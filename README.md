@@ -147,7 +147,8 @@ def semi_supervised():
 - row는 한 행의 엑셀 c0~c9의 확률값을 갖고 있습니다.
 - label에는 c0~c9중 가장 큰 값에 있는 라벨값(행 index 열 label)을 가져옵니다.
 - count는 갯수를 셉니다.
-
+###
+###
 ###
 ### 6) 모델에 입력가능한 train/valid data를 만들어 줍니다. 
 ```
