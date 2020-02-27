@@ -1,8 +1,6 @@
 # State Farm Distracted Driver Detection_Kaggle Competition
 
-안녕하세요 이번에는 캐글 대회 중 State Farm에서 주최한 이미지 분류에 대한 코딩입니다.
-
-총 22,424개의 학습 데이터가 10개의 클래스로 분류됩니다. 테스트 데이터는 총 79,726개 입니다.
+안녕하세요 이번에는 캐글 대회 중 State Farm에서 주최한 이미지 분류에 대한 코딩입니다. 총 22,424개의 학습 데이터가 10개의 클래스로 분류됩니다. 테스트 데이터는 총 79,726개 입니다.
 
 본 포스트는 정권우님의 '머신러닝 탐구생활'과 마스터 코드를 바탕으로 작성하였습니다.
 
@@ -42,8 +40,9 @@ warnings.filterwarnings("ignore")
 
 ```
 ### 　
-### 2) 
-
+### 2) 모델 구현 후 명령 프롬프트를 통해 학습 파라미터를 변경하여 모델 재현을 할 수 있도록 ArumentParser() 함수를 사용합니다.
+### 
+```
 #Define learning parameters
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', required=False, default='vgg16', help='Model Architecture')
@@ -54,8 +53,13 @@ parser.add_argument('--batch-size', required=False, type=int, default=2)
 parser.add_argument('--random-split', required=False, type=int, default=1)
 parser.add_argument('--data-augment', required=False, type=int, default=0)
 args = parser.parse_args()
-
-
+```
+### 　
+### 3) 모델을 Run할 때 마다 Input, Cache, Subm 폴더에 남아있을 수 있는 파일들을 제거하고 폴더를 재생성하여 모델을 Run할 수 있는 상태로 만들어 줍니다.
+- os.path.exists() : 파일이 있는지 확인
+- shutil.rmtree() : 폴더 삭제
+- os.mkdir() : 파일 생성
+### 
 #Clear and Make train/valid, cache, subm folders
 def _clear_dir(path):
     if os.path.exists(path):
