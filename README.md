@@ -13,7 +13,8 @@ https://www.kaggle.com/c/state-farm-distracted-driver-detection
 ### 　
 # 2. Let's get it started!
 ###
-### 1) 필요한 모듈을 모두 import 합니다. warnings.filterwarnings("ignore")은 Future Warning을 제거하기 위해 선언해 줍니다.
+### 1) 필요한 모듈을 모두 import 합니다. 
+- warnings.filterwarnings("ignore")은 Future Warning을 제거하기 위해 선언해 줍니다.
 ```
 #File I/O
 import os
@@ -44,7 +45,7 @@ warnings.filterwarnings("ignore")
 
 ```
 ### 　
-### 2) 모델 구현 후 명령 프롬프트를 통해 학습 파라미터를 변경하여 모델 재현을 할 수 있도록 ArumentParser() 함수를 사용합니다.
+### 2) 모델 구현 후 학습 파라미터를 변경하여 모델 재현을 할 수 있도록 ArumentParser() 함수를 사용합니다.
 ### 
 ```
 #Define learning parameters
@@ -71,7 +72,8 @@ def _clear_dir(path):
     os.mkdir(path)
 ```
 ### 　
-### 4) 학습에 사용할 모델을 선언해 줍니다. weights='imagenet'으로 입력하면 이미지넷의 학습된 가중치를 가져옵니다. 
+### 4) 학습에 사용할 모델을 선언해 줍니다. 
+weights='imagenet'으로 입력하면 이미지넷의 학습된 가중치를 가져옵니다. 
 ```
 #Define model
 def get_model():
@@ -143,6 +145,7 @@ def semi_supervised():
 - label에는 c0~c9중 가장 큰 값에 있는 라벨값(행 index 열 label)을 가져옵니다.
 - count는 갯수를 셉니다.
 ###
+###
 ### 6) 모델에 입력가능한 train/valid data를 만들어 줍니다. 
 ```
 #Make train data & valid data
@@ -174,9 +177,13 @@ def generate_split():
 
 ```
 ###
-### 7) Data augmentation을 하기 위해 img에 변위를 줍니다. // 는 나누기에서 몫을 구할때 씁니다. 
-
-또한 이미지의 세로의 길이 만큼 행을 만들어야 하고 가로의 길이만큼 열을 만들어야 하므로 가로, 세로의 크기를 반대로 써줘야한다.
+###
+### 7) Data augmentation을 하기 위해 img에 변위를 줍니다. 
+- // 는 나누기에서 몫을 구할때 씁니다. 
+- 또한 이미지의 세로의 길이 만큼 행을 만들어야 하고 가로의 길이만큼 열을 만들어야 하므로 가로, 세로의 크기를 반대로 써줘야 합니다.
+- Data Augmentation시 이미지의 변화가 너무 크면 로컬 미니멈으로 빠지는 경향이 있어 학습이 되지 않습니다.
+  학습이 되지 않는 경우 변위를 줄여서 안정적으로 학습할 수 있도록 설정해 줍니다.
+- 특히 기존 코드에서 어파인 변환은 되지 않아 삭제했고 줌은 0.8에서 0.9로 변경했습니다.
 ```
 def read_image(path):
     image = cv2.imread(path, cv2.IMREAD_COLOR)
@@ -209,7 +216,10 @@ def preprocess(image):
     image = cv2.resize(final_image, (img_row_size, img_col_size))
     return image
 
-
+```
+###
+###
+### 8) 실제로 main함수가 런되는 부분을 구현해 줍니다. 
 if __name__ == "__main__":
     print('# Train Model')
 
