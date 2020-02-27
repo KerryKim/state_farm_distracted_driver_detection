@@ -140,13 +140,13 @@ def semi_supervised():
             count[label] = count.get(label, 0) + 1
 
     print('# Added semi-supservised labels: \n{}'.format(count))
+
+```
 - .iterrows()를 사용하면 첫 번째 변수 i에는 행번호, 두번째 변수 row에는 그 행에 대한 값을 출력할 수 있습니다.
 - img에는 한 행의 엑셀 img 이름으로 된 데이터입니다. for 문을 돌면서 첫 번째행, 두번째 행.. 이렇게 순차적으로 들어갑니다.
 - row는 한 행의 엑셀 c0~c9의 확률값을 갖고 있습니다.
 - label에는 c0~c9중 가장 큰 값에 있는 라벨값(행 index 열 label)을 가져옵니다.
 - count는 갯수를 셉니다.
-```
-
 ###
 ### 6) 모델에 입력가능한 train/valid data를 만들어 줍니다. 
 ```
@@ -178,7 +178,6 @@ def generate_split():
     return train_samples, valid_samples
 
 ```
-###
 ###
 ### 7) Data augmentation을 하기 위해 img에 변위를 줍니다. 
 - // 는 나누기에서 몫을 구할때 씁니다. 
@@ -220,8 +219,18 @@ def preprocess(image):
 
 ```
 ###
-###
-### 8) 실제로 main함수가 런되는 부분을 구현해 줍니다. 
+### 8) 실제로 main함수가 런되는 부분을 구현해 줍니다.
+- n_class, nfolds 를 각각 10, 5로 주어도 컴퓨터는 0~9, 0~4로 인식하기 때문에 문제 없습니다.
+
+- test_nfolds는 모델 구현후 test data로 predict할 때 여러 iteration 후 평균을 취한 result를 구하기 위해 사용되는 
+  변수로 3번을 하게되면 3번 예측한 값을 다 더해서 3으로 나누어 평균을 얻게 됩니다.
+
+- _clear_dir()로 인해 폴더 내부가 깨끗히 정리됩니다.
+
+- ImageDataGenerator() 함수로 모델에 입력가능하도록 이미지 데이터를 전처리해 줍니다.
+  Attribution으로 rescale, preprocessing_function을 지정할 수 있으며 rescale를 통해 255로 나누어 Nomalization이 가능한데
+  여기 preprocess에는 255로 나누는 구문이 있으며 넘어갑니다.
+```
 if __name__ == "__main__":
     print('# Train Model')
 
@@ -247,7 +256,10 @@ if __name__ == "__main__":
         _clear_dir(path)
 
     datagen = ImageDataGenerator(rescale=1./255, preprocessing_function=preprocess)
-
+```
+###
+### 9) K Fold stratifed validation을 합니다.
+```
     #5-fold cross evaluation
     for fold in range(nfolds):
         model = get_model()
@@ -272,6 +284,10 @@ if __name__ == "__main__":
                             epochs=5, validation_data=valid_generator, validation_steps=valid_samples/args.batch_size,
                             shuffle=True, callbacks=callbacks, verbose=1)
 
+```
+###
+### 10) 학습한 모델로 test data를 예측합니다.
+```
         #Predict test data
         for j in range(test_nfolds):
             preds = model.predict_generator(test_generator, steps=len(test_id), verbose=1)
@@ -288,7 +304,15 @@ if __name__ == "__main__":
         shutil.rmtree(semi_train_path)
         shutil.rmtree(temp_train_fold)
         shutil.rmtree(temp_valid_fold)
-
+        
+```
+- pd.DataFrame(preds, columns=labels)을 통해서 c0~c9의 column으로 된 열과 predicts 행으로 된 result를 만듭니다.
+  (인덱스는 첫번째 행(라벨 컬럼)을 제외하고 2 번째 행부터 첫번째 인덱스가 들어갑니다.)
+- result.loc[:, 'img'] = pd.Series(test_id, index=result.index) 으로 img라는 행을 삽입합니다.
+- result.loc[:, 'img']로 'img'열을 ':(결과가 나온 행만큼의 수)'를 추가합니다.
+  행의 내용으로 test_id가 들어가고 result.index 는 기본으로 할당된 인덱스 값을 가져옵니다.
+### 11) Fold만큼 학습한 횟수를 평균 앙상블 해줍니다.
+```
     #Ensemble 5-folds
     print('# Ensemble')
 
@@ -299,3 +323,4 @@ if __name__ == "__main__":
     ensemble.loc[:, 'img'] = pd.Series(test_id, index=ensemble.index)
     sub_file = 'subm/{}/ens.csv'.format(suffix)
     ensemble.to_csv(sub_file, index=False)
+```
