@@ -149,7 +149,6 @@ def semi_supervised():
 - count는 갯수를 셉니다.
 
 ###
-###
 ### 6) 모델에 입력가능한 train/valid data를 만들어 줍니다. 
 ```
 #Make train data & valid data
