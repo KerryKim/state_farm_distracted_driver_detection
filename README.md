@@ -15,6 +15,7 @@ https://www.kaggle.com/c/state-farm-distracted-driver-detection
 ###
 ### 1) 필요한 모듈을 모두 import 합니다. warnings.filterwarnings("ignore")은 Future Warning을 제거하기 위해 선언해 줍니다.
 ```
+#File I/O
 import os
 import argparse
 import numpy as np
@@ -24,10 +25,12 @@ from shutil import copyfile, copytree
 from datetime import datetime
 from glob import glob
 
+#Image processing
 import cv2
 from scipy.ndimage import rotate
 import scipy.misc
 
+#Keras Library
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications.vgg16 import VGG16
 from tensorflow.keras.layers import Dense, Dropout, Flatten
@@ -35,6 +38,7 @@ from tensorflow.keras.optimizers import SGD
 from keras_preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
+#Etc
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -55,18 +59,20 @@ parser.add_argument('--data-augment', required=False, type=int, default=0)
 args = parser.parse_args()
 ```
 ### 　
-### 3) 모델을 Run할 때 마다 Input, Cache, Subm 폴더에 남아있을 수 있는 파일들을 제거하고 폴더를 재생성하여 모델을 Run할 수 있는 상태로 만들어 줍니다.
+### 3) 모델을 Run할 때 마다 Input, Cache, Subm 폴더에 남아있을 수 있는 파일들을 제거하고 폴더를 재생성하여 모델이 다시 학습할 수 있는 상태로 만들어 줍니다.
 - os.path.exists() : 파일이 있는지 확인
 - shutil.rmtree() : 폴더 삭제
 - os.mkdir() : 파일 생성
 ### 
-#Clear and Make train/valid, cache, subm folders
+```
 def _clear_dir(path):
     if os.path.exists(path):
         shutil.rmtree(path)
     os.mkdir(path)
-
-
+```
+### 　
+### 4) 학습에 사용할 모델을 선언해 줍니다. weights='imagenet'으로 입력하면 이미지넷의 학습된 가중치를 가져옵니다. 
+```
 #Define model
 def get_model():
     base_model = VGG16(include_top=False, weights='imagenet', input_shape=(img_row_size, img_col_size,3))
@@ -82,27 +88,44 @@ def get_model():
     sgd = SGD(lr=args.learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
     return model
-
-
+```
+### 　
+### 5) 비지도 학습을 하기 위해 Base model로 학습한 result 데이터의 정보를 이용합니다. 
+```
 #Make semi_train data
 def semi_supervised():
     test_pred_fname = 'dataaug/Submission_v1_data augmentation_200223_origin.csv'
     test_pred = pd.read_csv(test_pred_fname)
     test_pred_probs = test_pred.iloc[:, :-1]
     test_pred_probs_max = np.max(test_pred_probs.values, axis=1)
-
+```
+###
+- test_pred는 c0, c1, c2, ..., c9, img 열로 구성된 리스트 데이터입니다.
+- test_pred_probs는 [:, :-1] 범위로 (모든 행)X(c0,...c9)으로 구성된 리스트 데이터입니다.
+- test_pred_probs_max는 test_pred_probs의 데이터 중 각 행에서 최대값만 가져온 리스트 데이터입니다.
+###
+```
     for thr in range(1, 10):
         thr = thr / 10.
         count = sum(test_pred_probs_max > thr)
         print('# Thre : {} | count : {} ({}%)'.format(thr, count, 1. * count / len(test_pred_probs_max)))
-
+```
+###
+- for thr in range에서는 count는 test_pred_probs_max에 있는 데이터 중에서 thr보다 크면 그 갯수를 모두 더합니다.
+- len(test_pred_probs_max)는 test 이미지의 갯수가 됩니다. (총 이미지수)
+###
+```
     print('=' * 50)
     threshold = 0.90
     count = {}
     print('# Extracting data with threshold : {}'.format(threshold))
 
     copytree('input/train', 'input/semi_train')
-
+```
+###
+- copyfile은 파일을 복사하는 것이고 디렉토리(폴더)를 생성하면서 복사하려면 copytree를 써야한다.
+###
+```
     for i, row in test_pred.iterrows():
         img = row['img']
         row = row.iloc[:-1]
@@ -112,8 +135,16 @@ def semi_supervised():
             count[label] = count.get(label, 0) + 1
 
     print('# Added semi-supservised labels: \n{}'.format(count))
-
-
+```
+###
+- .iterrows()를 사용하면 첫 번째 변수 i에는 행번호, 두번째 변수 row에는 그 행에 대한 값을 출력할 수 있습니다.
+- img에는 한 행의 엑셀 img 이름으로 된 데이터입니다. for 문을 돌면서 첫 번째행, 두번째 행.. 이렇게 순차적으로 들어갑니다.
+- row는 한 행의 엑셀 c0~c9의 확률값을 갖고 있습니다.
+- label에는 c0~c9중 가장 큰 값에 있는 라벨값(행 index 열 label)을 가져옵니다.
+- count는 갯수를 셉니다.
+###
+### 6) 모델에 입력가능한 train/valid data를 만들어 줍니다. 
+```
 #Make train data & valid data
 def generate_split():
     #Make folders to save K fold data set(train/valid)
@@ -141,7 +172,12 @@ def generate_split():
     print('# {} train samples | {} valid samples'.format(train_samples, valid_samples))
     return train_samples, valid_samples
 
+```
+###
+### 7) Data augmentation을 하기 위해 img에 변위를 줍니다. // 는 나누기에서 몫을 구할때 씁니다. 
 
+또한 이미지의 세로의 길이 만큼 행을 만들어야 하고 가로의 길이만큼 열을 만들어야 하므로 가로, 세로의 크기를 반대로 써줘야한다.
+```
 def read_image(path):
     image = cv2.imread(path, cv2.IMREAD_COLOR)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
