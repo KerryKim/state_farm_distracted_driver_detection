@@ -1,3 +1,18 @@
+# State Farm Distracted Driver Detection_Kaggle Competition
+
+안녕하세요 이번에는 캐글 대회 중 State Farm에서 주최한 이미지 분류에 대한 코딩입니다.
+총 22,424개의 학습 데이터가 10개의 클래스로 분류됩니다. 테스트 데이터는 총 79,726개 입니다.
+
+본 포스트는 정권우님의 '머신러닝 탐구생활'과 마스터 코드를 바탕으로 작성하였습니다.
+
+### 　
+# 1. Prerequisites
+
+https://www.kaggle.com/c/state-farm-distracted-driver-detection
+캐글에 가입하고 데이터 세트를 다운받습니다.
+
+### 　
+# 2. Let's get it started!
 #File I/O
 import os
 import argparse
