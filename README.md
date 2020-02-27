@@ -58,6 +58,7 @@ parser.add_argument('--batch-size', required=False, type=int, default=2)
 parser.add_argument('--random-split', required=False, type=int, default=1)
 parser.add_argument('--data-augment', required=False, type=int, default=0)
 args = parser.parse_args()
+
 ```
 ### 　
 ### 3) 모델을 Run할 때 마다 Input, Cache, Subm 폴더에 남아있을 수 있는 파일들을 제거하고 폴더를 재생성하여 모델이 다시 학습할 수 있는 상태로 만들어 줍니다.
@@ -70,10 +71,11 @@ def _clear_dir(path):
     if os.path.exists(path):
         shutil.rmtree(path)
     os.mkdir(path)
+    
 ```
 ### 　
 ### 4) 학습에 사용할 모델을 선언해 줍니다. 
-weights='imagenet'으로 입력하면 이미지넷의 학습된 가중치를 가져옵니다. 
+- weights='imagenet'으로 입력하면 이미지넷의 학습된 가중치를 가져옵니다. 
 ```
 #Define model
 def get_model():
@@ -90,6 +92,7 @@ def get_model():
     sgd = SGD(lr=args.learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
     return model
+    
 ```
 ### 　
 ### 5) 비지도 학습을 하기 위해 Base model로 학습한 result 데이터의 정보를 이용합니다. 
@@ -144,6 +147,7 @@ def semi_supervised():
 - row는 한 행의 엑셀 c0~c9의 확률값을 갖고 있습니다.
 - label에는 c0~c9중 가장 큰 값에 있는 라벨값(행 index 열 label)을 가져옵니다.
 - count는 갯수를 셉니다.
+
 ###
 ###
 ### 6) 모델에 입력가능한 train/valid data를 만들어 줍니다. 
