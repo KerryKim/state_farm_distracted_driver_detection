@@ -324,3 +324,7 @@ if __name__ == "__main__":
     sub_file = 'subm/{}/ens.csv'.format(suffix)
     ensemble.to_csv(sub_file, index=False)
 ```
+### 　
+# 3. Result
+캐글에 결과를 제출하면 Score를 확인할 수 있습니다. 전 200등 정도네요~
+![1234](https://user-images.githubusercontent.com/28750244/75440776-b89a1800-599f-11ea-92f2-2e76d6e5d592.png)
