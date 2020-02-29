@@ -220,7 +220,7 @@ def preprocess(image):
 ```
 ###
 ### 8) 실제로 main함수가 런되는 부분을 구현해 줍니다.
-- n_class, nfolds 를 각각 10, 5로 주어도 컴퓨터는 0~9, 0~4로 인식하기 때문에 문제 없습니다.
+- n_class, nfolds 를 각각 10, 5로 주어도 컴퓨터는 0-9, 0-4로 인식하기 때문에 문제 없습니다.
 
 - test_nfolds는 모델 구현후 test data로 predict할 때 여러 iteration 후 평균을 취한 result를 구하기 위해 사용되는 
   변수로 3번을 하게되면 3번 예측한 값을 다 더해서 3으로 나누어 평균을 얻게 됩니다.
@@ -327,4 +327,4 @@ if __name__ == "__main__":
 ### 　
 # 3. Result
 캐글에 결과를 제출하면 Score를 확인할 수 있습니다. 전 200등 정도네요~
-![1234](https://user-images.githubusercontent.com/28750244/75440776-b89a1800-599f-11ea-92f2-2e76d6e5d592.png)
+![제목 없음](https://user-images.githubusercontent.com/28750244/75597009-76bfbd80-5ad6-11ea-95a3-1db8992717d2.png)
