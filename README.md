@@ -326,5 +326,6 @@ if __name__ == "__main__":
 ```
 ### 　
 # 3. Result
-캐글에 결과를 제출하면 Score를 확인할 수 있습니다. 전 200등 정도네요~
+캐글에 결과를 제출하면 Score를 확인할 수 있습니다. Public leaderboard에서는 180등 정도, Private에서는 140등 수준입니다^^
+###
 ![제목 없음](https://user-images.githubusercontent.com/28750244/75597009-76bfbd80-5ad6-11ea-95a3-1db8992717d2.png)
